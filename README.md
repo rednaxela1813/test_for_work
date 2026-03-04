@@ -241,16 +241,15 @@ sentiment
 ### Visualizations
 
 ```
-## Sentiment Distribution
+## Example Visualizations
 
-![Sentiment Distribution](/project/docs/images/sentiment_distribution.png)
+### Sentiment Distribution
+![Sentiment Distribution](docs/images/sentiment_distribution.png)
 
-## Keyword Frequency
-
+### Keyword Frequency
 ![Keyword Frequency](docs/images/keyword_frequency.png)
 
-## Publication Timeline
-
+### Publication Timeline
 ![Publication Timeline](docs/images/publication_timeline.png)
 ```
 
