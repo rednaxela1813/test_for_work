@@ -243,7 +243,7 @@ sentiment
 ```
 ## Sentiment Distribution
 
-![Sentiment Distribution](docs/images/sentiment_distribution.png)
+![Sentiment Distribution](/project/docs/images/sentiment_distribution.png)
 
 ## Keyword Frequency
 
