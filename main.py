@@ -9,7 +9,9 @@ from pathlib import Path
 import pandas as pd
 
 from dotenv import load_dotenv
-load_dotenv()
+
+base = Path(__file__).resolve().parent
+load_dotenv(base / ".env")
 
 from scraper import scrape_latest_articles
 from processor import process_articles, build_visuals
