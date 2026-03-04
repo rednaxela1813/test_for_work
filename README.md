@@ -240,11 +240,11 @@ sentiment
 
 ### Visualizations
 
-```
+
 ## Example Visualizations
 
 ### Sentiment Distribution
-![Sentiment Distribution](docs/images/sentiment_distribution.png)
+![Sentiment Distribution](docs/images/keyword_frequency.png)
 
 ### Keyword Frequency
 ![Keyword Frequency](docs/images/keyword_frequency.png)

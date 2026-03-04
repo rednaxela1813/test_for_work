@@ -189,7 +189,7 @@ pip-selfcheck.json
 
 .env
 *.env
-.env.*
+.env
 
 ### VirtualEnv ###
 # Virtualenv
