@@ -241,12 +241,17 @@ sentiment
 ### Visualizations
 
 ```
-reports/visuals/sentiment_distribution.png
-![Keyword Frequency](docs/images/sentiment_distribution.png)
-reports/visuals/keyword_frequency.png
+## Sentiment Distribution
+
+![Sentiment Distribution](docs/images/sentiment_distribution.png)
+
+## Keyword Frequency
+
 ![Keyword Frequency](docs/images/keyword_frequency.png)
-reports/visuals/publication_timeline.png
-![Keyword Frequency](docs/images/publication_timeline.png)
+
+## Publication Timeline
+
+![Publication Timeline](docs/images/publication_timeline.png)
 ```
 
 ### HTML Report
