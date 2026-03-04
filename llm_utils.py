@@ -44,6 +44,17 @@ DEFAULT_CHAT_MODEL = "meta-llama/Llama-3.1-8B-Instruct"
 DEFAULT_PROVIDER = "hf-inference"
 
 _SENTIMENT_ALLOWED = {"Positive", "Neutral", "Negative"}
+LLM_RECOVERABLE_ERRORS = (
+    TimeoutError,
+    ConnectionError,
+    OSError,
+    RuntimeError,
+    ValueError,
+    TypeError,
+    AttributeError,
+    IndexError,
+    KeyError,
+)
 
 
 @dataclass(frozen=True)
@@ -246,7 +257,7 @@ def _chat_json(prompt: str, cfg: LLMConfig) -> Dict[str, str]:
             last_err = "non-JSON or invalid JSON schema"
             log.warning("LLM returned invalid JSON. attempt=%d model=%s", attempt + 1, cfg.model)
 
-        except Exception as e:
+        except LLM_RECOVERABLE_ERRORS as e:
             last_err = str(e)
             log.warning("chat_completion failed. attempt=%d model=%s err=%s", attempt + 1, cfg.model, e)
 
@@ -303,7 +314,7 @@ def ai_analyze_article(title: str, text: str, topic: str) -> Dict[str, str]:
         if not payload["ai_summary"].strip():
             payload["ai_summary"] = _cheap_extractive_summary(text)
         return payload
-    except Exception as e:
+    except LLM_RECOVERABLE_ERRORS as e:
         log.warning("AI call failed, fallback used. err=%s", e)
         return {
             "ai_headline": title[:120] or "Key update",

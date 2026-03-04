@@ -1,12 +1,9 @@
-#project/scraper.py
-
 import logging
 import re
 import time
 from dataclasses import dataclass, asdict
-from datetime import datetime
 from typing import List, Optional
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urlparse
 from urllib.robotparser import RobotFileParser
 
 import requests
@@ -19,6 +16,13 @@ log = logging.getLogger("scraper")
 DEFAULT_HEADERS = {
     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"
 }
+
+SCRAPER_RECOVERABLE_ERRORS = (
+    requests.RequestException,
+    ValueError,
+    TypeError,
+    AttributeError,
+)
 
 
 @dataclass
@@ -198,7 +202,7 @@ def scrape_latest_articles(topic: str, max_articles: int, source: str = "techcru
             if not art.title or art.title == "(no title)":
                 continue
             articles.append(asdict(art))
-        except Exception as e:
+        except SCRAPER_RECOVERABLE_ERRORS as e:
             log.warning("Failed to parse article: %s error=%s", url, e)
 
     # If article dates missing, it’s acceptable; but we keep it.

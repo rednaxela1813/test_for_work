@@ -1,12 +1,8 @@
-#project/main.py
 import argparse
 import json
 import logging
-import os
 from datetime import datetime
 from pathlib import Path
-
-import pandas as pd
 
 from dotenv import load_dotenv
 
@@ -14,9 +10,8 @@ base = Path(__file__).resolve().parent
 load_dotenv(base / ".env")
 
 from scraper import scrape_latest_articles
-from processor import process_articles, build_visuals
+from processor import process_articles, build_visuals, build_html_report
 from llm_utils import enrich_with_llm
-from processor import build_html_report
 
 
 def setup_paths() -> dict:
@@ -48,6 +43,7 @@ def setup_logging(log_file: Path) -> None:
         ],
     )
 
+
 def parse_args():
     p = argparse.ArgumentParser(description="AI-Powered News Intelligence Pipeline")
     p.add_argument("--topic", default="electric vehicles", help="Keyword/topic to search")
@@ -58,17 +54,7 @@ def parse_args():
     return p.parse_args()
 
 
-def main():
-    
-    args = parse_args()
-    paths = setup_paths()
-    setup_logging(paths["log_file"])
-    log = logging.getLogger("main")
-
-    run_id = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
-    log.info("Run started. run_id=%s topic=%s max_articles=%s source=%s", run_id, args.topic, args.max_articles, args.source)
-
-    # 1) Scrape
+def run_scrape(args, paths: dict, log: logging.Logger):
     raw_articles = scrape_latest_articles(
         topic=args.topic,
         max_articles=args.max_articles,
@@ -77,31 +63,31 @@ def main():
     )
     log.info("Scraped %d raw articles", len(raw_articles))
 
-    # Save raw JSON
     with open(paths["raw_json"], "w", encoding="utf-8") as f:
         json.dump(raw_articles, f, ensure_ascii=False, indent=2)
     log.info("Saved raw JSON: %s", paths["raw_json"])
+    return raw_articles
 
-    # 2) Process
+
+def run_processing(raw_articles, args, paths: dict, log: logging.Logger):
     df = process_articles(raw_articles)
     log.info("Processed dataset rows=%d cols=%d", df.shape[0], df.shape[1])
 
-    # 3) LLM enrichment
     if not args.no_llm:
         df = enrich_with_llm(df, topic=args.topic)
         log.info("LLM enrichment completed")
     else:
         log.warning("LLM enrichment skipped by --no-llm")
 
-    # Save processed XLSX
     df.to_excel(paths["processed_xlsx"], index=False)
     log.info("Saved processed Excel: %s", paths["processed_xlsx"])
+    return df
 
-    # 4) Visuals
+
+def run_report(df, args, paths: dict, log: logging.Logger):
     visuals_paths = build_visuals(df, output_dir=paths["visuals"])
     log.info("Saved visuals: %s", visuals_paths)
 
-    # 5) HTML report
     build_html_report(
         df=df,
         topic=args.topic,
@@ -112,9 +98,22 @@ def main():
     )
     log.info("Saved report: %s", paths["report_html"])
 
+
+def main():
+    args = parse_args()
+    paths = setup_paths()
+    setup_logging(paths["log_file"])
+    log = logging.getLogger("main")
+
+    run_id = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+    log.info("Run started. run_id=%s topic=%s max_articles=%s source=%s", run_id, args.topic, args.max_articles, args.source)
+
+    raw_articles = run_scrape(args, paths, log)
+    df = run_processing(raw_articles, args, paths, log)
+    run_report(df, args, paths, log)
+
     log.info("Run finished successfully.")
-    
-    
+
+
 if __name__ == "__main__":
     main()
-    

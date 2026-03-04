@@ -21,15 +21,38 @@ CATEGORY_RULES = {
     "Market": ["demand", "sales", "customers", "competition", "growth", "pricing", "supply"],
 }
 
+# Cached once to avoid repeated corpus loading on each tokenization call.
+_STOPWORDS_CACHE = None
+
+
+def _get_english_stopwords() -> set:
+    global _STOPWORDS_CACHE
+    if _STOPWORDS_CACHE is None:
+        try:
+            _STOPWORDS_CACHE = set(stopwords.words("english"))
+        except LookupError:
+            log.warning("NLTK stopwords corpus is missing. Continuing without stopword filtering.")
+            _STOPWORDS_CACHE = set()
+    return _STOPWORDS_CACHE
+
 
 def _clean_text(s: str) -> str:
-    s = (s or "").strip()
+    if not isinstance(s, str):
+        if pd.isna(s):
+            s = ""
+        else:
+            s = str(s)
+    s = s.strip()
     s = re.sub(r"\s+", " ", s)
     return s.strip()
 
 
 def _normalize_date(s: str):
     # TechCrunch often provides ISO datetime; we convert to date for timeline
+    if not isinstance(s, str):
+        if pd.isna(s):
+            return None
+        s = str(s)
     if not s:
         return None
     s = s.strip()
@@ -46,7 +69,7 @@ def _tokenize(text: str) -> List[str]:
     text = (text or "").lower()
     text = re.sub(r"[^a-z0-9\s\-]", " ", text)
     tokens = [t for t in text.split() if len(t) >= 3]
-    sw = set(stopwords.words("english"))
+    sw = _get_english_stopwords()
     return [t for t in tokens if t not in sw]
 
 
